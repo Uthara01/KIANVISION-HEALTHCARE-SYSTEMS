@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Doctor Details - Healthcare Management System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #eaf4f4;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        h1 {
+            color: #087e8b;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+        }
+        .form-container, .list-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+            text-align: left;
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+            color: #333;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 15px;
+            background: #087e8b;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0b5c64;
+        }
+        .back-btn {
+            background: #6c757d;
+            margin-top: 10px;
+        }
+        .back-btn:hover {
+            background: #5a6268;
+        }
+        .doctor-card {
+            border-left: 4px solid #087e8b;
+            background: #f9f9f9;
+            padding: 10px 15px;
+            margin-top: 10px;
+            border-radius: 4px;
+        }
+        .status-available {
+            color: green;
+            font-weight: bold;
+        }
+        .status-busy {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Doctor Directory</h1>
+
+    <div class="container">
+        <!-- Add New Doctor Form -->
+        <div class="form-container">
+            <h3>Add New Doctor</h3>
+            <form id="doctorForm">
+                <label for="docName">Doctor Name:</label>
+                <input type="text" id="docName" placeholder="Dr. John Doe" required>
+
+                <label for="specialty">Specialty:</label>
+                <select id="specialty">
+                    <option value="General Physician">General Physician</option>
+                    <option value="Cardiology">Cardiology</option>
+                    <option value="Dermatology">Dermatology</option>
+                    <option value="Pediatrics">Pediatrics</option>
+                    <option value="Neurology">Neurology</option>
+                </select>
+
+                <label for="timing">Available Hours:</label>
+                <input type="text" id="timing" placeholder="e.g., 9:00 AM - 2:00 PM" required>
+
+                <label for="status">Status:</label>
+                <select id="status">
+                    <option value="Available">Available</option>
+                    <option value="On Leave">On Leave</option>
+                </select>
+
+                <button type="submit">Add Doctor</button>
+            </form>
+            <button class="back-btn" onclick="window.location.href='healthcare.html'">Back to Home</button>
+        </div>
+
+        <!-- Doctor List Display -->
+        <div class="list-container">
+            <h3>Available Specialist Doctors</h3>
+            <div id="doctorListDisplay"></div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('doctorForm');
+        const displayList = document.getElementById('doctorListDisplay');
+
+        // Default initial doctors if none exist in local storage
+        const defaultDoctors = [
+            { name: "Dr. A. Sharma", specialty: "Cardiology", timing: "10:00 AM - 4:00 PM", status: "Available" },
+            { name: "Dr. P. Roy", specialty: "General Physician", timing: "09:00 AM - 1:00 PM", status: "Available" }
+        ];
+
+        function loadDoctors() {
+            displayList.innerHTML = '';
+            let doctors = JSON.parse(localStorage.getItem('doctors'));
+            
+            if (!doctors || doctors.length === 0) {
+                doctors = defaultDoctors;
+                localStorage.setItem('doctors', JSON.stringify(doctors));
+            }
+
+            doctors.forEach(doc => {
+                let div = document.createElement('div');
+                div.className = 'doctor-card';
+                let statusClass = doc.status === 'Available' ? 'status-available' : 'status-busy';
+                div.innerHTML = `
+                    <strong>${doc.name}</strong> (${doc.specialty})<br>
+                    <span>Hours: ${doc.timing}</span> | 
+                    <span class="${statusClass}">Status: ${doc.status}</span>
+                `;
+                displayList.appendChild(div);
+            });
+        }
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const newDoctor = {
+                name: document.getElementById('docName').value,
+                specialty: document.getElementById('specialty').value,
+                timing: document.getElementById('timing').value,
+                status: document.getElementById('status').value
+            };
+
+            let doctors = JSON.parse(localStorage.getItem('doctors')) || [];
+            doctors.push(newDoctor);
+            localStorage.setItem('doctors', JSON.stringify(doctors));
+
+            form.reset();
+            loadDoctors();
+        });
+
+        // Initialize display
+        loadDoctors();
+    </script>
+
+</body>
+</html>

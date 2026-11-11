@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Emergency Cases - Healthcare Management System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #eaf4f4;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        h1 {
+            color: #d9534f;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+        }
+        .form-container, .list-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+            text-align: left;
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+            color: #333;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 15px;
+            background: #d9534f;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #c9302c;
+        }
+        .back-btn {
+            background: #6c757d;
+            margin-top: 10px;
+        }
+        .back-btn:hover {
+            background: #5a6268;
+        }
+        .emergency-card {
+            border-left: 5px solid #d9534f;
+            background: #fff5f5;
+            padding: 12px 15px;
+            margin-top: 10px;
+            border-radius: 4px;
+        }
+        .urgency-Critical {
+            color: #d9534f;
+            font-weight: bold;
+        }
+        .urgency-Severe {
+            color: #f0ad4e;
+            font-weight: bold;
+        }
+        .urgency-Moderate {
+            color: #0275d8;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Emergency Case Management</h1>
+
+    <div class="container">
+        <!-- Log Emergency Case Form -->
+        <div class="form-container">
+            <h3>Log New Emergency</h3>
+            <form id="emergencyForm">
+                <label for="patientName">Patient Name:</label>
+                <input type="text" id="patientName" placeholder="Patient Name" required>
+
+                <label for="condition">Emergency Condition:</label>
+                <input type="text" id="condition" placeholder="e.g., Trauma / Cardiac Arrest" required>
+
+                <label for="urgency">Urgency Level:</label>
+                <select id="urgency">
+                    <option value="Critical">Critical (Immediate Care)</option>
+                    <option value="Severe">Severe (Urgent Care)</option>
+                    <option value="Moderate">Moderate (Priority Care)</option>
+                </select>
+
+                <label for="assignedDoctor">Assigned ER Doctor:</label>
+                <input type="text" id="assignedDoctor" placeholder="e.g., Dr. A. Sharma" required>
+
+                <button type="submit">Log Emergency Case</button>
+            </form>
+            <button class="back-btn" onclick="window.location.href='healthcare.html'">Back to Home</button>
+        </div>
+
+        <!-- Active Emergency Queue Display -->
+        <div class="list-container">
+            <h3>Active ER Queue</h3>
+            <div id="emergencyListDisplay"></div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('emergencyForm');
+        const displayList = document.getElementById('emergencyListDisplay');
+
+        function loadEmergencies() {
+            displayList.innerHTML = '';
+            let cases = JSON.parse(localStorage.getItem('emergencyCases')) || [];
+
+            if (cases.length === 0) {
+                displayList.innerHTML = '<p style="color: #666; font-style: italic;">No active emergency cases logged.</p>';
+                return;
+            }
+
+            cases.forEach(c => {
+                let div = document.createElement('div');
+                div.className = 'emergency-card';
+                div.innerHTML = `
+                    <strong>Patient: ${c.name}</strong> | <span class="urgency-${c.urgency}">Level: ${c.urgency}</span><br>
+                    <strong>Condition:</strong> ${c.condition}<br>
+                    <span>Assigned Doctor: ${c.doctor}</span>
+                `;
+                displayList.appendChild(div);
+            });
+        }
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const newCase = {
+                name: document.getElementById('patientName').value,
+                condition: document.getElementById('condition').value,
+                urgency: document.getElementById('urgency').value,
+                doctor: document.getElementById('assignedDoctor').value
+            };
+
+            let cases = JSON.parse(localStorage.getItem('emergencyCases')) || [];
+            cases.push(newCase);
+            localStorage.setItem('emergencyCases', JSON.stringify(cases));
+
+            form.reset();
+            loadEmergencies();
+        });
+
+        // Initialize page
+        loadEmergencies();
+    </script>
+
+</body>
+</html>

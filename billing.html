@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Billing & Invoices - Healthcare Management System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #eaf4f4;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        h1 {
+            color: #087e8b;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+        }
+        .form-container, .list-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+            text-align: left;
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+            color: #333;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 15px;
+            background: #087e8b;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0b5c64;
+        }
+        .back-btn {
+            background: #6c757d;
+            margin-top: 10px;
+        }
+        .back-btn:hover {
+            background: #5a6268;
+        }
+        .bill-card {
+            border-left: 4px solid #087e8b;
+            background: #f9f9f9;
+            padding: 10px 15px;
+            margin-top: 10px;
+            border-radius: 4px;
+        }
+        .amount {
+            color: #2b9348;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Patient Billing & Invoices</h1>
+
+    <div class="container">
+        <!-- Generate Bill Form -->
+        <div class="form-container">
+            <h3>Generate Invoice</h3>
+            <form id="billingForm">
+                <label for="patientSelect">Select Patient:</label>
+                <select id="patientSelect" required>
+                    <!-- Populated dynamically -->
+                </select>
+
+                <label for="serviceType">Service / Treatment:</label>
+                <input type="text" id="serviceType" placeholder="e.g., Cardiology Consultation & ECG" required>
+
+                <label for="amount">Total Amount ($):</label>
+                <input type="number" id="amount" placeholder="e.g., 250" required min="1">
+
+                <label for="paymentStatus">Payment Status:</label>
+                <select id="paymentStatus">
+                    <option value="Paid">Paid</option>
+                    <option value="Pending">Pending</option>
+                </select>
+
+                <button type="submit">Generate Invoice</button>
+            </form>
+            <button class="back-btn" onclick="window.location.href='healthcare.html'">Back to Home</button>
+        </div>
+
+        <!-- Invoices Display -->
+        <div class="list-container">
+            <h3>Generated Invoices</h3>
+            <div id="billListDisplay"></div>
+        </div>
+    </div>
+
+    <script>
+        const patientSelect = document.getElementById('patientSelect');
+        const form = document.getElementById('billingForm');
+        const displayList = document.getElementById('billListDisplay');
+
+        function loadPatientDropdown() {
+            let patients = JSON.parse(localStorage.getItem('patients')) || [];
+            patientSelect.innerHTML = '';
+            
+            if (patients.length === 0) {
+                let opt = document.createElement('option');
+                opt.textContent = 'No patients registered yet';
+                opt.disabled = true;
+                opt.selected = true;
+                patientSelect.appendChild(opt);
+            } else {
+                patients.forEach(p => {
+                    let opt = document.createElement('option');
+                    opt.value = p.name;
+                    opt.textContent = `${p.name} (Issue: ${p.disease})`;
+                    patientSelect.appendChild(opt);
+                });
+            }
+        }
+
+        function loadInvoices() {
+            displayList.innerHTML = '';
+            let bills = JSON.parse(localStorage.getItem('hospitalBills')) || [];
+            
+            if (bills.length === 0) {
+                displayList.innerHTML = '<p style="color: #666; font-style: italic;">No invoices generated yet.</p>';
+                return;
+            }
+
+            bills.forEach(b => {
+                let div = document.createElement('div');
+                div.className = 'bill-card';
+                div.innerHTML = `
+                    <strong>Patient: ${b.patient}</strong><br>
+                    Service: ${b.service}<br>
+                    Amount: <span class="amount">$${b.amount}</span> | Status: <strong>${b.status}</strong>
+                `;
+                displayList.appendChild(div);
+            });
+        }
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            if (!patientSelect.value) {
+                alert('Please register a patient first!');
+                return;
+            }
+
+            const newBill = {
+                patient: patientSelect.value,
+                service: document.getElementById('serviceType').value,
+                amount: document.getElementById('amount').value,
+                status: document.getElementById('paymentStatus').value
+            };
+
+            let bills = JSON.parse(localStorage.getItem('hospitalBills')) || [];
+            bills.push(newBill);
+            localStorage.setItem('hospitalBills', JSON.stringify(bills));
+
+            form.reset();
+            loadPatientDropdown();
+            loadInvoices();
+        });
+
+        loadPatientDropdown();
+        loadInvoices();
+    </script>
+
+</body>
+</html>

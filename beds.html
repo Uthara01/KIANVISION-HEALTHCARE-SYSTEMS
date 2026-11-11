@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Bed Availability - Healthcare Management System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #eaf4f4;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        h1 {
+            color: #087e8b;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+        }
+        .form-container, .list-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+            text-align: left;
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+            color: #333;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 15px;
+            background: #087e8b;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0b5c64;
+        }
+        .back-btn {
+            background: #6c757d;
+            margin-top: 10px;
+        }
+        .back-btn:hover {
+            background: #5a6268;
+        }
+        .bed-card {
+            border-left: 4px solid #087e8b;
+            background: #f9f9f9;
+            padding: 10px 15px;
+            margin-top: 10px;
+            border-radius: 4px;
+        }
+        .available-count {
+            color: green;
+            font-weight: bold;
+        }
+        .occupied-count {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Hospital Bed Availability</h1>
+
+    <div class="container">
+        <!-- Update Ward Status Form -->
+        <div class="form-container">
+            <h3>Update Ward Status</h3>
+            <form id="bedForm">
+                <label for="wardName">Ward Name:</label>
+                <select id="wardName" required>
+                    <option value="General Ward">General Ward</option>
+                    <option value="ICU (Intensive Care Unit)">ICU (Intensive Care Unit)</option>
+                    <option value="Emergency Ward">Emergency Ward</option>
+                    <option value="Private Room">Private Room</option>
+                </select>
+
+                <label for="totalBeds">Total Beds:</label>
+                <input type="number" id="totalBeds" placeholder="e.g., 50" required min="1">
+
+                <label for="occupiedBeds">Occupied Beds:</label>
+                <input type="number" id="occupiedBeds" placeholder="e.g., 20" required min="0">
+
+                <button type="submit">Update Ward</button>
+            </form>
+            <button class="back-btn" onclick="window.location.href='healthcare.html'">Back to Home</button>
+        </div>
+
+        <!-- Bed Status Display -->
+        <div class="list-container">
+            <h3>Current Ward Overview</h3>
+            <div id="bedListDisplay"></div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('bedForm');
+        const displayList = document.getElementById('bedListDisplay');
+
+        // Default initial wards if none exist in local storage
+        const defaultWards = [
+            { ward: "General Ward", total: 50, occupied: 30 },
+            { ward: "ICU (Intensive Care Unit)", total: 15, occupied: 12 },
+            { ward: "Emergency Ward", total: 20, occupied: 8 },
+            { ward: "Private Room", total: 10, occupied: 4 }
+        ];
+
+        function loadBeds() {
+            displayList.innerHTML = '';
+            let wards = JSON.parse(localStorage.getItem('hospitalBeds'));
+            
+            if (!wards || wards.length === 0) {
+                wards = defaultWards;
+                localStorage.setItem('hospitalBeds', JSON.stringify(wards));
+            }
+
+            wards.forEach(w => {
+                let available = w.total - w.occupied;
+                let div = document.createElement('div');
+                div.className = 'bed-card';
+                div.innerHTML = `
+                    <strong>${w.ward}</strong><br>
+                    Total Beds: ${w.total} | 
+                    <span class="occupied-count">Occupied: ${w.occupied}</span> | 
+                    <span class="available-count">Available: ${available}</span>
+                `;
+                displayList.appendChild(div);
+            });
+        }
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const wardName = document.getElementById('wardName').value;
+            const total = parseInt(document.getElementById('totalBeds').value);
+            const occupied = parseInt(document.getElementById('occupiedBeds').value);
+
+            if (occupied > total) {
+                alert('Occupied beds cannot exceed total beds!');
+                return;
+            }
+
+            let wards = JSON.parse(localStorage.getItem('hospitalBeds')) || [];
+            
+            // Check if ward already exists, update it if so
+            let existingIndex = wards.findIndex(w => w.ward === wardName);
+            if (existingIndex >= 0) {
+                wards[existingIndex].total = total;
+                wards[existingIndex].occupied = occupied;
+            } else {
+                wards.push({ ward: wardName, total, occupied });
+            }
+
+            localStorage.setItem('hospitalBeds', JSON.stringify(wards));
+            form.reset();
+            loadBeds();
+        });
+
+        // Initialize display
+        loadBeds();
+    </script>
+
+</body>
+</html>

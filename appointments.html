@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Book Appointment - Healthcare Management System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #eaf4f4;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        h1 {
+            color: #087e8b;
+        }
+        .form-container {
+            background: white;
+            max-width: 420px;
+            margin: 20px auto;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+            text-align: left;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+            color: #333;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 15px;
+            background: #087e8b;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0b5c64;
+        }
+        .back-btn {
+            background: #6c757d;
+            margin-top: 10px;
+        }
+        .back-btn:hover {
+            background: #5a6268;
+        }
+        .appointment-list {
+            max-width: 420px;
+            margin: 20px auto;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: left;
+            box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+        }
+        ul {
+            padding-left: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Book an Appointment</h1>
+
+    <div class="form-container">
+        <form id="appointmentForm">
+            <label for="patientSelect">Select Patient:</label>
+            <select id="patientSelect" required>
+                <!-- Populated dynamically from stored patients -->
+            </select>
+
+            <label for="department">Department / Specialist:</label>
+            <select id="department" required>
+                <option value="General Physician">General Physician</option>
+                <option value="Cardiology">Cardiology</option>
+                <option value="Dermatology">Dermatology</option>
+                <option value="Pediatrics">Pediatrics</option>
+                <option value="Neurology">Neurology</option>
+            </select>
+
+            <label for="appointmentDate">Appointment Date:</label>
+            <input type="date" id="appointmentDate" required>
+
+            <label for="appointmentTime">Time Slot:</label>
+            <input type="time" id="appointmentTime" required>
+
+            <button type="submit">Book Appointment</button>
+        </form>
+        <button class="back-btn" onclick="window.location.href='healthcare.html'">Back to Home</button>
+    </div>
+
+    <div class="appointment-list">
+        <h3>Scheduled Appointments</h3>
+        <ul id="appointmentListDisplay"></ul>
+    </div>
+
+    <script>
+        const patientSelect = document.getElementById('patientSelect');
+        const appointmentForm = document.getElementById('appointmentForm');
+        const displayList = document.getElementById('appointmentListDisplay');
+
+        // Populate patient dropdown from registered patients
+        function loadPatientDropdown() {
+            let patients = JSON.parse(localStorage.getItem('patients')) || [];
+            patientSelect.innerHTML = '';
+            
+            if (patients.length === 0) {
+                let opt = document.createElement('option');
+                opt.textContent = 'No patients registered yet';
+                opt.disabled = true;
+                opt.selected = true;
+                patientSelect.appendChild(opt);
+            } else {
+                patients.forEach(p => {
+                    let opt = document.createElement('option');
+                    opt.value = p.name;
+                    opt.textContent = `${p.name} (Issue: ${p.disease})`;
+                    patientSelect.appendChild(opt);
+                });
+            }
+        }
+
+        // Load existing scheduled appointments
+        function loadAppointments() {
+            displayList.innerHTML = '';
+            let appointments = JSON.parse(localStorage.getItem('appointments')) || [];
+            appointments.forEach(app => {
+                let li = document.createElement('li');
+                li.textContent = `${app.patient} - ${app.dept} on ${app.date} at ${app.time}`;
+                displayList.appendChild(li);
+            });
+        }
+
+        appointmentForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            if (!patientSelect.value) {
+                alert('Please register a patient first!');
+                return;
+            }
+
+            const newApp = {
+                patient: patientSelect.value,
+                dept: document.getElementById('department').value,
+                date: document.getElementById('appointmentDate').value,
+                time: document.getElementById('appointmentTime').value
+            };
+
+            let appointments = JSON.parse(localStorage.getItem('appointments')) || [];
+            appointments.push(newApp);
+            localStorage.setItem('appointments', JSON.stringify(appointments));
+
+            appointmentForm.reset();
+            loadPatientDropdown();
+            loadAppointments();
+        });
+
+        // Initialize page
+        loadPatientDropdown();
+        loadAppointments();
+    </script>
+
+</body>
+</html>

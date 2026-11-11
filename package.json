@@ -1,0 +1,11 @@
+{
+  "name": "healthcare-management-system",
+  "version": "1.0.0",
+  "description": "Healthcare Management System",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}
